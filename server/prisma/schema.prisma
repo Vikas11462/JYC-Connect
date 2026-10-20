@@ -1,0 +1,210 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  COORDINATOR
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  passwordHash        String
+  name                String
+  rollNumber          String?              @unique
+  department          String?
+  yearOfStudy         Int?
+  phone               String?
+  role                Role                 @default(STUDENT)
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  coordinatorHubs     HubCoordinator[]
+  registrations       Registration[]
+  attendances         Attendance[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+
+  @@index([role])
+}
+
+model Hub {
+  id           String           @id @default(uuid())
+  slug         String           @unique
+  name         String
+  category     String           // Creative, Technology, Community, Growth
+  icon         String           // Lucide icon identifier
+  color        String           // Brand hex color
+  tint         String           // Light background tint
+  tagline      String
+  description  String?          @db.Text
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  coordinators HubCoordinator[]
+  events       Event[]
+  announcements Announcement[]
+}
+
+model HubCoordinator {
+  id         String   @id @default(uuid())
+  userId     String
+  hubId      String
+  assignedAt DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hub        Hub      @relation(fields: [hubId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hubId])
+}
+
+model Event {
+  id                String          @id @default(uuid())
+  hubId             String
+  title             String
+  slug              String          @unique
+  category          String
+  type              String          // Competition, Workshop, Hackathon, Tournament, etc.
+  date              DateTime
+  startTime         String          // e.g. "10:00 AM"
+  endTime           String          // e.g. "05:00 PM"
+  venue             String
+  description       String          @db.Text
+  highlights        String[]        @default([])
+  posterUrl         String?
+  capacity          Int
+  registeredCount   Int             @default(0)
+  status            EventStatus     @default(DRAFT)
+  registrationsOpen Boolean         @default(true)
+  deadline          DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  hub               Hub             @relation(fields: [hubId], references: [id])
+  registrations     Registration[]
+  attendances       Attendance[]
+  announcements     Announcement[]
+
+  @@index([hubId, status, date])
+}
+
+model Registration {
+  id           String             @id @default(uuid())
+  eventId      String
+  userId       String
+  status       RegistrationStatus @default(CONFIRMED)
+  registeredAt DateTime           @default(now())
+  cancelledAt  DateTime?
+
+  event        Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendance   Attendance?
+
+  @@unique([eventId, userId])
+  @@index([userId, status])
+}
+
+model Attendance {
+  id             String           @id @default(uuid())
+  eventId        String
+  userId         String
+  registrationId String           @unique
+  status         AttendanceStatus
+  markedAt       DateTime         @default(now())
+  markedById     String           // Coordinator or Admin user ID
+
+  event          Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registration   Registration     @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Announcement {
+  id          String    @id @default(uuid())
+  title       String
+  content     String    @db.Text
+  hubId       String?
+  eventId     String?
+  isPinned    Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  hub         Hub?      @relation(fields: [hubId], references: [id], onDelete: SetNull)
+  event       Event?    @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
+
+model GalleryItem {
+  id          String   @id @default(uuid())
+  title       String
+  category    String   // Events, Culture, Sports, Workshops, Campus Life
+  imageUrl    String
+  thumbnailUrl String?
+  isTall      Boolean  @default(false)
+  isWide      Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model TeamMember {
+  id          String   @id @default(uuid())
+  name        String
+  role        String   // G.S. Secretary, Office Bearer, Hub Coordinator
+  hubName     String?
+  bio         String?
+  avatarUrl   String?
+  order       Int      @default(0)
+  isCore      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  timestamp DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

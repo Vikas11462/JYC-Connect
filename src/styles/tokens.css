@@ -1,0 +1,91 @@
+/* ============================================================
+   JYC Connect — Design Tokens
+   Deep indigo + violet primary, cyan accents, Inter typography
+   ============================================================ */
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Brand */
+  --indigo-950: #10153f;
+  --indigo-900: #1a2065;
+  --indigo-800: #232b8f;
+  --indigo-700: #2d37b8;
+  --violet-600: #7c3aed;
+  --violet-500: #8b5cf6;
+  --violet-100: #ede9fe;
+  --cyan-500: #06b6d4;
+  --cyan-100: #cffafe;
+
+  /* Neutrals */
+  --ink-900: #0f1222;
+  --ink-700: #2b3245;
+  --ink-500: #5b6472;
+  --ink-400: #8a93a5;
+  --line: #e7e9f2;
+  --bg: #ffffff;
+  --bg-soft: #f6f7fb;
+  --bg-deep: #141a4d;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --success: #15803d;
+  --success-bg: #f0fdf4;
+  --warning: #b45309;
+  --warning-bg: #fffbeb;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(16, 21, 63, 0.06), 0 1px 3px rgba(16, 21, 63, 0.08);
+  --shadow-md: 0 6px 18px rgba(16, 21, 63, 0.10);
+  --shadow-lg: 0 16px 40px rgba(16, 21, 63, 0.16);
+
+  /* Spacing scale */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  --container: 1200px;
+  --nav-h: 72px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--ink-900);
+  background: var(--bg);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+h1, h2, h3, h4 { line-height: 1.15; margin: 0 0 var(--space-3); letter-spacing: -0.02em; }
+p { margin: 0 0 var(--space-4); }
+
+:focus-visible {
+  outline: 3px solid var(--cyan-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+.container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--space-5); }
+.section { padding: var(--space-8) 0; }
+.section-soft { background: var(--bg-soft); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--violet-600); margin-bottom: var(--space-3);
+}
+.section-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight: 800; color: var(--indigo-950); }
+.section-sub { color: var(--ink-500); max-width: 56ch; }
